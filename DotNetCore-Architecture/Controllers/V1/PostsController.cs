@@ -7,10 +7,13 @@ using DotNetCore_Architecture.Contracts.V1.Requests;
 using DotNetCore_Architecture.Contracts.V1.Responses;
 using DotNetCore_Architecture.Domain;
 using DotNetCore_Architecture.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotNetCore_Architecture.Controllers
 {
+    [Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme)]
     public class PostsController : Controller
     {
         private readonly IPostService _postService;

@@ -55,11 +55,11 @@ namespace DotNetCore_Architecture
             app.UseSwagger(options => { options.RouteTemplate = swaggerOptions.JsonRoute; });
             app.UseSwaggerUI(options => { options.SwaggerEndpoint(swaggerOptions.UIEndPoint, swaggerOptions.Description); });
 
-           //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             //app.UseCookiePolicy();
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
 
             app.UseMvc();
         }
