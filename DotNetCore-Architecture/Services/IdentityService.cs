@@ -21,10 +21,32 @@ namespace DotNetCore_Architecture.Services
             _userManager = userManager;
             _jwtSettings = jwtSettings;
         }
+
+        public async Task<AuthenticationResult> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if(user == null)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = new[] { "User does not exist" }
+                };
+            }
+            var userHasValidPassword = await _userManager.CheckPasswordAsync(user, password);
+            if (!userHasValidPassword)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = new[] { "User/password combination is wrong" }
+                };
+            }
+            return GenerateAuthenticationResultForUserAsync(user);
+        }
+
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
             var existingUser = await _userManager.FindByEmailAsync(email);
-            if (existingUser !=null)
+            if (existingUser != null)
             {
                 return new AuthenticationResult
                 {
@@ -47,6 +69,11 @@ namespace DotNetCore_Architecture.Services
                 };
             }
 
+            return GenerateAuthenticationResultForUserAsync(newUser);
+        }
+
+        private AuthenticationResult GenerateAuthenticationResultForUserAsync(IdentityUser newUser)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -58,8 +85,8 @@ namespace DotNetCore_Architecture.Services
                     new Claim(JwtRegisteredClaimNames.Email,newUser.Email),
                     new Claim("id",newUser.Id)
                 }),
-                Expires=DateTime.UtcNow.AddHours(2),
-                SigningCredentials=new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256Signature)
+                Expires = DateTime.UtcNow.AddHours(2),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return new AuthenticationResult()
