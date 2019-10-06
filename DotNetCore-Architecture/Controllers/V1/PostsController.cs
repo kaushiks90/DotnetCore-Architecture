@@ -10,6 +10,7 @@ using DotNetCore_Architecture.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using DotNetCore_Architecture.Extensions;
 
 namespace DotNetCore_Architecture.Controllers
 {
@@ -40,7 +41,7 @@ namespace DotNetCore_Architecture.Controllers
         [HttpPost(ApiRoutes.Posts.Create)]
         public async Task<IActionResult> Create([FromBody] CreatePostRequest postRequest)
         {
-            var post = new Post { Name = postRequest.Name };
+            var post = new Post { Name = postRequest.Name ,UserId= HttpContext.GetUserId() };
 
             await _postService.CreatePostAsync(post);
 
@@ -54,6 +55,11 @@ namespace DotNetCore_Architecture.Controllers
         [HttpPut(ApiRoutes.Posts.Update)]
         public async Task<IActionResult> Update([FromRoute] Guid postId,[FromBody] UpdatePostRequest request)
         {
+            var userOwnsPost = await _postService.UsersOwnsPostAsync(postId, HttpContext.GetUserId());
+            if (!userOwnsPost)
+            {
+                return BadRequest(new { error = "You do not own this post" });
+            }
             var post = new Post
             {
                 Id = postId,
@@ -69,6 +75,12 @@ namespace DotNetCore_Architecture.Controllers
         [HttpDelete(ApiRoutes.Posts.Delete)]
         public async Task<IActionResult> Delete([FromRoute] Guid postId)
         {
+            var userOwnsPost = await _postService.UsersOwnsPostAsync(postId, HttpContext.GetUserId());
+            if (!userOwnsPost)
+            {
+                return BadRequest(new { error = "You do not own this post" });
+            }
+
             var deleted = await _postService.DeletePostAsync(postId);
             if (deleted)
                 return NoContent();
