@@ -181,9 +181,9 @@ namespace DotNetCore_Architecture.Services
                 }
                 return principal;
             }
-            catch
+            catch(Exception ex)
             {
-                return null;
+                throw ex;
             }
         }
 

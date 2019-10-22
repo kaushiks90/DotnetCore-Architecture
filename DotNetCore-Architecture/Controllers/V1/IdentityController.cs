@@ -58,7 +58,7 @@ namespace DotNetCore_Architecture.Controllers.V1
             });
         }
 
-        [HttpPost(ApiRoutes.Identity.Login)]
+        [HttpPost(ApiRoutes.Identity.Refresh)]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
             var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken);
